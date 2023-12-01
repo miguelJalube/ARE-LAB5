@@ -72,12 +72,20 @@ architecture rtl of avl_user_interface is
     constant DEFAULT_INTERFACE_ID2 : std_logic_vector(avl_readdata_o'range) := x"CAFE0369";
 
     -- Behind the Avalon bus, we get a relative offset, like:
-    constant OFFSET_INTERF_ID1 : integer :=  0; -- from offset: 0x000 with attributs: R
-    constant OFFSET_INTERF_ID2 : integer :=  1; -- from offset: 0x004 with attributs: R/W
-    constant OFFSET_SWITCHES   : integer :=  2; -- ...........: 0x008 ..............: R
-    constant OFFSET_KEYS       : integer :=  4; -- ...........: 0x010 ..............: R
-    constant OFFSET_LEDS       : integer :=  8; -- ...........: 0x020...............: R/W
-
+    constant OFFSET_INTERF_ID1  : integer :=  0; -- from offset: 0x000 with attributs: R
+    constant OFFSET_KEYS        : integer :=  1; -- from offset: 0x004 with attributs: R/W
+    constant OFFSET_SWITCHES    : integer :=  2; -- ...........: 0x008 ..............: R
+    constant OFFSET_LEDS        : integer :=  3; -- ...........: 0x00C ..............: R/W
+    constant OFFSET_STATUS      : integer :=  4; -- ...........: 0x010 ..............: R/W
+    constant OFFSET_MODE_DELAY  : integer :=  5; -- ...........: 0x014 ..............: R/W
+    --nos adresses--------------------
+    constant OFFSET_FUNC1       : integer :=  6; -- ...........: 0x018 ..............: R/W
+    constant OFFSET_FUNC2       : integer :=  7; -- ...........: 0x01C ..............: R/W
+    --nos adresses--------------------
+    constant OFFSET_NA          : integer :=  8; -- ...........: 0x020 ..............: R
+    constant OFFSET_NB          : integer :=  9; -- ...........: 0x024 ..............: R
+    constant OFFSET_NC          : integer := 10; -- ...........: 0x028 ..............: R
+    constant OFFSET_ND          : integer := 11; -- ...........: 0x02C ..............: R
 
     --| Signals declarations   |--------------------------------------------------------------
     --| Avalon interface       |
