@@ -88,20 +88,39 @@ architecture rtl of avl_user_interface is
     constant OFFSET_ND          : integer := 11; -- ...........: 0x02C ..............: R
 
     --| Signals declarations   |--------------------------------------------------------------
-    --| Avalon interface       |
-    signal avl_interf_id2_s    : std_logic_vector(avl_readdata_o'range);
-    signal avl_readdata_s      : std_logic_vector(avl_readdata_o'range);
-    signal avl_readdatavalid_s : std_logic;
-    signal addr_int_s          : integer := 0;
-    --| I/O's                  |
+    signal nbrs_save_s : std_logic;
+    signal status_s    : std_logic_vector(1 downto 0);
     signal led_s       : std_logic_vector(led_o'range);
-  
+    signal mode_delay_s     : std_logic_vector(4 downto 0);
+    signal delay_s          : std_logic_vector(1 downto 0);
+    signal mode_gen_s       : std_logic;
+    signal init_nbr_s       : std_logic;
+    signal new_nbr_s        : std_logic;
+    signal nbr_a_s          : std_logic_vector(21 downto 0);
+    signal nbr_b_s          : std_logic_vector(21 downto 0);
+    signal nbr_c_s          : std_logic_vector(21 downto 0);
+    signal nbr_d_s          : std_logic_vector(21 downto 0);
+    signal avl_interf_id2_s : std_logic_vector(avl_readdata_o'range);
+    signal addr_int_s       : integer;
 
 begin
     -- Avalon address cast as integer for Reading & Writing address decoding simplicities
     addr_int_s <= to_integer(unsigned(avl_address_i));
 
-  
+    nbr_a_s <= nbr_a_i;
+    nbr_b_s <= nbr_b_i;
+    nbr_c_s <= nbr_c_i;
+    nbr_d_s <= nbr_d_i;
+
+    status_s <= "00";
+    mode_delay_s <= mode_gen_s & "00" & delay_s;
+
+    avl_interf_id2_s <= DEFAULT_INTERFACE_ID2;
+
+
+    -- Init signals
+    ---------------------------------------------------------------------------
+
 
     -- Read access part
     ---------------------------------------------------------------------------
@@ -128,6 +147,15 @@ begin
 
             when OFFSET_LEDS       => avl_readdata_s(led_s'range)            <= led_s;
 
+            when OFFSET_STATUS     => avl_readdata_s(status_s'range)         <= status_s;
+
+            when OFFSET_MODE_DELAY => avl_readdata_s(mode_delay_s'range)     <= mode_delay_s;
+
+            when OFFSET_NA         => avl_readdata_s(nbr_a_s'range)          <= nbr_a_s;
+            when OFFSET_NB         => avl_readdata_s(nbr_b_s'range)          <= nbr_b_s;
+            when OFFSET_NC         => avl_readdata_s(nbr_c_s'range)          <= nbr_c_s;
+            when OFFSET_ND         => avl_readdata_s(nbr_d_s'range)          <= nbr_d_s;
+
             when others            => avl_readdata_s    <= DBG_RD_CST;
           end case;
         end if;
@@ -140,9 +168,7 @@ begin
     ---------------------------------------------------------------------------
     begin
       if avl_reset_i = '1' then
-        avl_interf_id2_s    <= DEFAULT_INTERFACE_ID2;
         led_s               <= (others => '0');
-
 
       elsif rising_edge(avl_clk_i) then
         cs_wr_max10_datas_s <= '0';
@@ -150,14 +176,13 @@ begin
         -- Update when write wanted
         if avl_write_i = '1' then
           case addr_int_s is
-            when OFFSET_INTERF_ID2 => avl_interf_id2_s <= avl_writedata_i;
-
             when OFFSET_LEDS       => led_s            <= avl_writedata_i(led_s'range);
 
-            when OFFSET_MAX10_LEDS => lp36_data_s         <= avl_writedata_i;
-                                      cs_wr_max10_datas_s <= '1'; -- Create pulse
+            when OFFSET_STATUS     => new_nbr_s        <= avl_writedata_i(4 downto 4);
+                                      init_nbr_s       <= avl_writedata_i(0 downto 0);
 
-            when OFFSET_MAX10_CFG  => lp36_sel_s       <= avl_writedata_i(lp36_sel_s'range);
+            when OFFSET_MODE_DELAY => mode_gen_s       <= avl_writedata_i(4 downto 4);
+                                      delay_s          <= avl_writedata_i(1 downto 0);
 
             when others            => NULL;
                                       --avl_readdata_s   <= DBG_WR_CST; -- Used during simulation
@@ -166,53 +191,16 @@ begin
       end if;
     end process;
 
-    -- Interface management
-    ---------------------------------------------------------------------------
-    fut_state_dec: process(cs_wr_max10_datas_s, curr_state_s, avl_clk_i, avl_reset_i)
-    ---------------------------------------------------------------------------
-    begin
-      -- Counter register
-      if avl_reset_i = '1' then
-        counter_curr_s <= (others => '0');
-      
-      elsif rising_edge(avl_clk_i) then
-        counter_curr_s <= counter_fut_s;
-      end if;
-      
-      -- Default value(s)
-      lp36_we_s <= '0';
-      
-      -- Default state
-      fut_state_s <= WAIT_WR_MAX10_DATAS;
 
-      --!! Rem: Only actives outputs are given by state !!
-      case curr_state_s is
-          when WAIT_WR_MAX10_DATAS =>
-            counter_fut_s <= to_unsigned(0, counter_fut_s'length);
-            
-            if cs_wr_max10_datas_s = '1' then
-              fut_state_s <= BUSY;
-            end if;
-            
-          when BUSY =>
-            if counter_curr_s /= COUNTER_ITERATIONS then
-              lp36_we_s   <= '1';
-              fut_state_s <= INC_COUNTER;
-            else
-              fut_state_s <= WAIT_WR_MAX10_DATAS;
-            end if;
-            
-          when INC_COUNTER =>
-            counter_fut_s <= counter_curr_s + 1;
-            lp36_we_s     <= '1';
-            fut_state_s   <= BUSY;
-
-          when others =>
-                fut_state_s <= WAIT_WR_MAX10_DATAS;
-      end case;
-    end process fut_state_dec;
 
     -- Connection internal signals to real signals
- 
+  
+    avl_readdatavalid_o <= '1';
+    avl_waitrequest_o   <= '0';
+    led_o               <= led_s;
+    cmd_init_o          <= init_nbr_s;
+    cmd_new_nbr_o       <= new_nbr_s;
+    auto_o              <= mode_gen_s;
+    delay_o             <= delay_s;
 
 end rtl;
