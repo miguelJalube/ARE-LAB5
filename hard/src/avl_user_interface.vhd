@@ -69,7 +69,6 @@ architecture rtl of avl_user_interface is
     constant DBG_WR_CST : std_logic_vector(avl_readdata_o'range) := x"09090909";
     
     constant INTERFACE_ID1         : std_logic_vector(avl_readdata_o'range) := x"DEADBEEF";
-    constant DEFAULT_INTERFACE_ID2 : std_logic_vector(avl_readdata_o'range) := x"CAFE0369";
 
     -- Behind the Avalon bus, we get a relative offset, like:
     constant OFFSET_INTERF_ID1  : integer :=  0; -- from offset: 0x000 with attributs: R
@@ -102,24 +101,27 @@ architecture rtl of avl_user_interface is
     signal nbr_d_s          : std_logic_vector(21 downto 0);
     signal avl_interf_id2_s : std_logic_vector(avl_readdata_o'range);
     signal addr_int_s       : integer;
-
-
-
     signal avl_readdata_s      : std_logic_vector(avl_readdata_o'range);
+
 begin
     -- Avalon address cast as integer for Reading & Writing address decoding simplicities
-    addr_int_s <= to_integer(unsigned(avl_address_i));
+  addr_int_s <= to_integer(unsigned(avl_address_i));
 
-    nbr_a_s <= nbr_a_i;
-    nbr_b_s <= nbr_b_i;
-    nbr_c_s <= nbr_c_i;
-    nbr_d_s <= nbr_d_i;
-
-    status_s <= "00";
-    mode_delay_s <= mode_gen_s & "00" & delay_s;
-
-    avl_interf_id2_s <= DEFAULT_INTERFACE_ID2;
-
+  number_gen: process (avl_clk_i, avl_reset_i)
+  begin 
+    if avl_reset_i = '1' then
+      nbr_a_s <= (others => '0');
+      nbr_b_s <= (others => '0');
+      nbr_c_s <= (others => '0');
+      nbr_d_s <= (others => '0');
+      status_s <= "00";
+    elsif rising_edge(avl_clk_i) then
+      nbr_a_s <= nbr_a_i;
+      nbr_b_s <= nbr_b_i;
+      nbr_c_s <= nbr_c_i;
+      nbr_d_s <= nbr_d_i;
+    end if;
+  end process;
 
     -- Init signals
     ---------------------------------------------------------------------------
@@ -132,21 +134,21 @@ begin
     begin
       if avl_reset_i = '1' then
         avl_readdata_s <= (others => '0');
+        avl_readdatavalid_o <= '0';
 
       elsif rising_edge(avl_clk_i) then
         -- By default, fully set read data to 0 & later on, affect only concerned part
         avl_readdata_s <= (others => '0');
+        avl_readdatavalid_o <= avl_read_i;
 
         -- Update when read wanted
         if avl_read_i = '1' then
           case addr_int_s is
-            when OFFSET_INTERF_ID1 => avl_readdata_s(INTERFACE_ID1'range)    <= INTERFACE_ID1;
+            when 0 => avl_readdata_s(INTERFACE_ID1'range)    <= INTERFACE_ID1;
 
-            when OFFSET_INTERF_ID2 => avl_readdata_s(avl_interf_id2_s'range) <= avl_interf_id2_s;
-
-            when OFFSET_SWITCHES   => avl_readdata_s(switch_i'range)         <= switch_i;
-
-            when OFFSET_KEYS       => avl_readdata_s(button_i'range)        <= button_i;
+            when 1       => avl_readdata_s(button_i'range)        <= button_i;
+            
+            when 2   => avl_readdata_s(switch_i'range)         <= switch_i;
 
             when OFFSET_LEDS       => avl_readdata_s(led_s'range)            <= led_s;
 
@@ -172,19 +174,23 @@ begin
     begin
       if avl_reset_i = '1' then
         led_s               <= (others => '0');
+        mode_delay_s        <= (others => '0');
+        mode_gen_s          <= '0';
+        delay_s             <= (others => '0');
+        new_nbr_s           <= '0';
+        init_nbr_s          <= '0';
 
       elsif rising_edge(avl_clk_i) then
-        cs_wr_max10_datas_s <= '0';
       
         -- Update when write wanted
         if avl_write_i = '1' then
           case addr_int_s is
             when OFFSET_LEDS       => led_s            <= avl_writedata_i(led_s'range);
 
-            when OFFSET_STATUS     => new_nbr_s        <= avl_writedata_i(4 downto 4);
-                                      init_nbr_s       <= avl_writedata_i(0 downto 0);
+            when OFFSET_STATUS     => new_nbr_s        <= avl_writedata_i(4);
+                                      init_nbr_s       <= avl_writedata_i(0);
 
-            when OFFSET_MODE_DELAY => mode_gen_s       <= avl_writedata_i(4 downto 4);
+            when OFFSET_MODE_DELAY => mode_gen_s       <= avl_writedata_i(4);
                                       delay_s          <= avl_writedata_i(1 downto 0);
 
             when others            => NULL;
@@ -194,16 +200,14 @@ begin
       end if;
     end process;
 
-
-
     -- Connection internal signals to real signals
   
-    avl_readdatavalid_o <= '1';
-    avl_waitrequest_o   <= '0';
     led_o               <= led_s;
     cmd_init_o          <= init_nbr_s;
     cmd_new_nbr_o       <= new_nbr_s;
     auto_o              <= mode_gen_s;
     delay_o             <= delay_s;
+    avl_readdata_o      <= avl_readdata_s;
+    avl_waitrequest_o   <= '0';
 
 end rtl;

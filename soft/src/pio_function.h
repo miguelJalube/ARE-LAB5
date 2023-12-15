@@ -27,7 +27,7 @@
 #include "axi_lw.h"
 
 // Base address
-#define PIO_CORE0_BASE_ADD (AXI_LW_HPS_FPGA_BASE_ADD + 0x1000)
+#define PIO_CORE0_BASE_ADD (AXI_LW_HPS_FPGA_BASE_ADD + 0x10000)
 
 #define PIO0_ADDR *(volatile uint32_t *)PIO_CORE0_BASE_ADD
 

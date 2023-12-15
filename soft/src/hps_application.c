@@ -141,6 +141,8 @@ int main(void)
     {
 
         switches = Switchs_read();
+
+        printf("switches: %d\n", switches);
         /* leds copy switches */
         Leds_set(switches);
 
