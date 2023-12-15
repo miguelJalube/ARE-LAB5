@@ -1,7 +1,7 @@
 
 \center
 
-# **Laboratoire 3: Conception d’une interface simple**
+# **Laboratoire 5: Conception d’une interface fiable**
 
 \hfill\break
 
@@ -33,7 +33,7 @@ Unité d'enseignement: **ARE**
 
 Auteur(s):
 
-- **BOUGNON-PEIGNE Kévin**
+- **JALUBE Miguel**
 - **CECCHET Costantino**
 
 Professeur:
@@ -46,7 +46,7 @@ Assistant:
 
 Date:
 
-- **Novembre 2023**
+- **Décembre 2023**
 
 \pagebreak
 
@@ -64,7 +64,7 @@ Date:
 
     - [Canal de lecture](#canal-de-lecture)
 
-    - [Machine d'état pour l'écriture de la MAX10](#machine-détat-pour-lécriture-de-la-max10)
+    - [Machine d'état pour la lecture fiable](#machine-détat-pour-la-lecture-fiable)
 
   - [Synthèse](#synthèse)
 
@@ -80,7 +80,7 @@ Date:
 
 ## **Introduction**
 
-Pour ce laboratoire, il est demandé de réaliser une interface simple, connectée sur le bus Avalon interconnectant l'HPS (microcontroller) et l'FPGA de la carte DE1-SoC.
+Pour ce laboratoire, il est demandé de réaliser une interface fiable, connectée sur le bus Avalon interconnectant l'HPS (microcontroller) et l'FPGA de la carte DE1-SoC.
 
 L'arborescence de fichiers de base du projet a été fourni par les responsables de cours.
 
@@ -95,46 +95,6 @@ Comme le montre le bloc de l'interface a concevoir:
 \center
 
 ![bloc_schem.png](_pics/bloc_schem.png){ width=90% }
-
-\raggedright
-
-\hfill\break
-
-Elle ne reçoit que 14bits pour l'adresse.
-
-Ceci s'explique par le fait que le bus de données est sur **32bits**. Dès lors, une valeur 32bits doit pouvoir s'adresser de telles façons à accèder à chacun de ces bytes, soit:
-
-\small
-
-```shell
-|   REGISTRE     32     BITS    |
-| ----------------------------- |
-| BYTE3 | BYTE2 | BYTE1 | BYTE0 |
-|      0x3     0x2     0x1     0x0 Offset à partir de l'adr. de base du reg.
-```
-
-\normalsize
-
-\hfill\break
-
-Ce faisant, les adresses dans le plan d'adressage doivent être alignées sur 2bits, autrement dit, alignées sur 4. **Ce qui enlève les 2 premiers bits de poids faibles.**
-
-\pagebreak
-
-Ensuite, le manuel de référence technique du processeur nous indique que le bus Avalon débute à l'adresse 0xFF20'0000, avec une mémoire allouée de 2MB. **Il en est déduisible que les 11 derniers bits de poids forts sont décodés par ce dernier.**
-
-De plus, la zone attribuée aux étudiants est présenté avec le tableau ci-dessous:
-
-\center
-
-\small
-
-| Offset on bus AXI lightweight HPS2FGPA | Fonctionnalités |
-| :-------------: | --------------- |
-| 0x00_0000 - 0x00_0003 | Constante ID 32Bits (Read only) |
-| 0x00_0004 - 0x00_FFFF | reserved |
-| **0x01_0000 - 0x01_FFFF** | **Zone à disposition des étudiants** |
-| 0x02_0000 - 0x1F_FFFF | not used |
 
 \normalsize
 
@@ -263,7 +223,7 @@ Lors de la lecture d'une donnée, un décalage d'une période d'horloge est effe
 
 \pagebreak
 
-#### **Machine d'état pour l'écriture de la MAX10**
+#### **Machine d'état pour la lecture fiable**
 
 \
 
