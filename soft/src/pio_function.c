@@ -32,22 +32,10 @@ uint32_t Switchs_read(void)
         return switches;
 }
 
-void Leds_write(uint32_t value)
-{
-        uint32_t value_to_copy = PIO0_REG(LED_REG) & LED_MASK;
-        PIO0_REG(LED_REG) = value | value_to_copy;
-}
-
 void Leds_set(uint32_t maskleds)
 {
 
         PIO0_REG(LED_REG) = maskleds;
-}
-
-void Leds_clear(uint32_t maskleds)
-{
-        uint32_t leds_value = PIO0_REG(LED_REG) & LED_MASK;
-        PIO0_REG(LED_REG) = maskleds & ~leds_value;
 }
 
 bool Key_read(int key_number)

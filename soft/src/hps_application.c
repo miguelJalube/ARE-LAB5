@@ -105,7 +105,7 @@ bool acquisition_mode_select(uint32_t switches)
  */
 void mode_set(bool mode, uint8_t speed)
 {
-    AXI_LW_REG(MODE_DELAY_REG) = (mode << 5) | speed;
+    PIO0_REG(MODE_DELAY_REG) = (mode << 5) | speed;
 }
 
 /**
@@ -115,7 +115,7 @@ void mode_set(bool mode, uint8_t speed)
  */
 uint8_t get_status()
 {
-    return AXI_LW_REG(0x10) & 0x3;
+    return PIO0_REG(INIT_GEN_REG) ;
 }
 
 int main(void)
@@ -128,7 +128,7 @@ int main(void)
     printf("ID: %lx\n", PIO0_ADDR);
 
     /* Set Default values on LEDS and hex display */
-    Leds_clear(LED_MASK);
+    Leds_set(0x0);
 
     /* set our base mode based on switches */
 
@@ -157,15 +157,16 @@ int main(void)
         /* Set all numbers to 0 */
         if ((Key_read(0) == 0) && key0_pressed == 1)
         {
-            AXI_LW_REG(INIT_GEN_REG) = RESET_BIT;
+            PIO0_REG(INIT_GEN_REG) = RESET_BIT;
             key0_pressed = 0;
         }
 
         /* in manual mode generate 4 new numbers */
         if (!mode && (Key_read(1) == 0) && key1_pressed == 1)
         {
-            AXI_LW_REG(INIT_GEN_REG) = GEN_BIT;
+            PIO0_REG(INIT_GEN_REG) = GEN_BIT;
             key1_pressed = 0;
+            PIO0_REG(INIT_GEN_REG) = 0x0;
         }
 
         /* check if the load key is pressed */
@@ -173,7 +174,7 @@ int main(void)
         {
             /* set reliable acquisition mode ask for a picture of the system */
             if (acquisition_mode)
-                AXI_LW_REG(acquisition_mode_reg) = 0x1;
+                PIO0_REG(acquisition_mode_reg) = 0x1;
 
             /* get the numbers */
 
@@ -183,17 +184,17 @@ int main(void)
                 nbrs[i] = AXI_LW_REG(Na + i * 4) && NB_BITS_MASK;
             */
 
-            nbrs[0] = AXI_LW_REG(Na) && NB_BITS_MASK;
-            nbrs[1] = AXI_LW_REG(Nb) && NB_BITS_MASK;
-            nbrs[2] = AXI_LW_REG(Nc) && NB_BITS_MASK;
+            nbrs[0] = PIO0_REG(Na) & NB_BITS_MASK;
+            nbrs[1] = PIO0_REG(Nb) & NB_BITS_MASK;
+            nbrs[2] = PIO0_REG(Nc) & NB_BITS_MASK;
 
             /* Nd is the sum */
-            nbrs[3] = AXI_LW_REG(Nd) && NB_BITS_MASK;
+            nbrs[3] = PIO0_REG(Nd) & NB_BITS_MASK;
 
             status = get_status();
 
             if (acquisition_mode)
-                AXI_LW_REG(acquisition_mode_reg) = 0x0;
+                PIO0_REG(acquisition_mode_reg) = 0x0;
 
             /* compare the numbers */
             if (nbrs[3] != nbrs[0] + nbrs[1] + nbrs[2])

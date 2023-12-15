@@ -58,20 +58,11 @@
 // Return : Value of all Switchs (SW9 to SW0)
 uint32_t Switchs_read(void);
 
-// Leds_write function : Write a value to all Leds (LED9 to LED0) doesn't change the other Leds
-// Parameter : "value"= data to be applied to all Leds (maximum 0x3FF)
-// Return : None
-void Leds_write(uint32_t value);
 
 // Leds_set function : Set to ON some or all Leds (LED9 to LED0)
 // Parameter : "maskleds"= Leds selected to apply a set (maximum 0x3FF)
 // Return : None
 void Leds_set(uint32_t maskleds);
-
-// Leds_clear function : Clear to OFF some or all Leds (LED9 to LED0)
-// Parameter : "maskleds"= Leds selected to apply a clear (maximum 0x3FF)
-// Return : None
-void Leds_clear(uint32_t maskleds);
 
 
 // Key_read function : Read one Key status, pressed or not (KEY0 or KEY1 or KEY2 or KEY3)
