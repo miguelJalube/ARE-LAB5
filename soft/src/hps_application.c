@@ -33,7 +33,6 @@ int __auto_semihosting;
 /* Used key's */
 static uint8_t key0_pressed = 0;
 static uint8_t key1_pressed = 0;
-static uint8_t key3_pressed = 0;
 
 static bool mode = false; // 0 is manual 1 is automatic
 static uint8_t speed = 0;
@@ -133,8 +132,8 @@ int main(void)
 
     /* set our base mode based on switches */
 
-    uint8_t switches;
-    uint8_t status;
+    uint32_t switches;
+    uint32_t status;
     uint32_t errors = 0;
 
     while (true)
@@ -142,7 +141,6 @@ int main(void)
 
         switches = Switchs_read();
 
-        printf("switches: %d\n", switches);
         /* leds copy switches */
         Leds_set(switches);
 
@@ -200,12 +198,12 @@ int main(void)
             /* compare the numbers */
             if (nbrs[3] != nbrs[0] + nbrs[1] + nbrs[2])
             {
-                printf("ER : status: %d, somme: %d, nbr_a: %d, nbr_b: %d, nbr_c: %d, nbr_d: %d\n", status, nbrs[3], nbrs[0], nbrs[1], nbrs[2], nbrs[3]);
-                printf("ER : nombre d'erreur cumulées: %d\n", ++errors);
+                printf("ER : status: %ld, somme: %ld, nbr_a: %ld, nbr_b: %ld, nbr_c: %ld, nbr_d: %ld\n", status, nbrs[3], nbrs[0], nbrs[1], nbrs[2], nbrs[3]);
+                printf("ER : nombre d'erreur cumulées: %ld\n", ++errors);
             }
             else
             {
-                printf("OK : status: %d, somme: %d, nbr_a: %d, nbr_b: %d, nbr_c: %d, nbr_d: %d\n", status, nbrs[3], nbrs[0], nbrs[1], nbrs[2], nbrs[3]);
+                printf("OK : status: %ld, somme: %ld, nbr_a: %ld, nbr_b: %ld, nbr_c: %ld, nbr_d: %ld\n", status, nbrs[3], nbrs[0], nbrs[1], nbrs[2], nbrs[3]);
             }
         }
 

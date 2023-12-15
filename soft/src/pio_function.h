@@ -32,7 +32,7 @@
 #define PIO0_ADDR *(volatile uint32_t *)PIO_CORE0_BASE_ADD
 
 // ACCESS MACROS
-#define PIO0_REG(_x_) *(volatile uint32_t *)(PIO_CORE0_BASE_ADD + _x_)
+#define PIO0_REG(_x_) *(volatile uint32_t *)((PIO_CORE0_BASE_ADD + _x_))
 
 // switchs
 #define SWICH_REG 0x8

@@ -28,7 +28,7 @@
 
 uint32_t Switchs_read(void)
 {
-        uint32_t switches = PIO0_REG(SWICH_REG) & SWICH_REG;
+        uint32_t switches = PIO0_REG(SWICH_REG) & SWITCHS_MASK;
         return switches;
 }
 
