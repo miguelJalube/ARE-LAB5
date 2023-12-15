@@ -196,7 +196,7 @@ int main(void)
                 AXI_LW_REG(acquisition_mode_reg) = 0x0;
 
             /* compare the numbers */
-            if (somme != nbrs[0] + nbrs[1] + nbrs[2])
+            if (nbrs[3] != nbrs[0] + nbrs[1] + nbrs[2])
             {
                 printf("ER : status: %d, somme: %d, nbr_a: %d, nbr_b: %d, nbr_c: %d, nbr_d: %d\n", status, nbrs[3], nbrs[0], nbrs[1], nbrs[2], nbrs[3]);
                 printf("ER : nombre d'erreur cumulées: %d\n", ++errors);
