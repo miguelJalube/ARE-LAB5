@@ -64,11 +64,7 @@ static uint32_t nbrs[4];
 
 int main(void){
     
-    /* Init peripherals */
-    Switchs_init();
-    Leds_init();
-    Keys_init();
-    Segs7_init();
+  
 
     /* Set Default values on LEDS and hex display */
     Leds_clear(LED_MASK);

@@ -103,6 +103,9 @@ architecture rtl of avl_user_interface is
     signal avl_interf_id2_s : std_logic_vector(avl_readdata_o'range);
     signal addr_int_s       : integer;
 
+
+
+    signal avl_readdata_s      : std_logic_vector(avl_readdata_o'range);
 begin
     -- Avalon address cast as integer for Reading & Writing address decoding simplicities
     addr_int_s <= to_integer(unsigned(avl_address_i));
@@ -143,7 +146,7 @@ begin
 
             when OFFSET_SWITCHES   => avl_readdata_s(switch_i'range)         <= switch_i;
 
-            when OFFSET_KEYS       => avl_readdata_s(boutton_i'range)        <= boutton_i;
+            when OFFSET_KEYS       => avl_readdata_s(button_i'range)        <= button_i;
 
             when OFFSET_LEDS       => avl_readdata_s(led_s'range)            <= led_s;
 
