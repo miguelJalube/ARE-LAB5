@@ -96,6 +96,7 @@ Comme le montre le bloc de l'interface a concevoir:
 
 ![bloc_schem.png](_pics/bloc_schem.png){ width=90% }
 
+
 \normalsize
 
 \raggedright
@@ -109,18 +110,17 @@ Le plan d'adressage a ensuite été définit comme suit:
 | Address (CPU Side) [16..0] | Address (Itf side) [15..2] | Definition | R/W |
 | :----------: | :---------: | :------------- | :-: |
 | 0x1_0000 | 0x0000 | Constant ID (**0xDEADBEEF**) | R |
-| 0x1_0004 | 0x0001 | Constant 2 (Debug) | R/W |
-| 0x1_0008 | 0x0002 | IN: Switches | R |
 | 0x1_0010 | 0x0004 | IN: Keys | R |
-| 0x1_0020 | 0x0008 | OUT: LEDs | R/W |
-| 0x1_0040 | 0x0010 | OUT: MAX10-LEDs | R/W |
-| 0x1_0080 | 0x0020 | OUT: MAX10-cfg (status[5..4] + sel[3..0]) | R/W[^1] |
-| 0x1_0100 | 0x0040 | IN: MAX10-busy (write\_enable) | R |
-| 0x1_0200 | 0x0080 | *reserved* | - |
-| 0x1_0400 | 0x0100 | *reserved* | - |
-| 0x1_.... | 0x0... | *reserved* | - |
-| 0x1_.... | 0x0... | *reserved* | - |
-| 0x1_FFF8 | 0x0800 | *reserved* | - |
+| 0x1_0008 | 0x0008 | IN: Switches | R |
+| 0x1_0020 | 0x000C | OUT: LEDs | R/W |
+| 0x1_0200 | 0x0010 | *reserved* | - |
+| 0x1_0400 | 0x0014 | *reserved* | - |
+| 0x1_.... | 0x0018 | *reserved* | - |
+| 0x1_.... | 0x001c | *reserved* | - |
+| 0x1_FFF8 | 0x0020 | *reserved* | - |
+| 0x1_FFFC | 0x0024 | *reserved* | - |
+| 0x1_1000 | 0x0028 | *reserved* | - |
+| 0x1_2000 | 0x002C | *reserved* | - |
 | 0x1_FFFC | 0x1000 | *reserved* | - |
 
 [^1]: *status* est *read only*, car ces bits indiquent si la MAX10 est prête à l'emploi ou non.
