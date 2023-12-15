@@ -25,72 +25,32 @@
 #include <stdint.h>
 #include <stdbool.h>
 #include "pio_function.h"
-#include "7seg_alphanum.h"
-
-void Switchs_init(void)
-{
-        PIO0_REG(DIR_ADDR_OFFSET) &= ~SWITCHS_BITS;
-}
-
-void Leds_init(void)
-{
-        PIO0_REG(DIR_ADDR_OFFSET) |= LEDS_BITS;
-}
-
-void Keys_init(void)
-{
-        PIO0_REG(DIR_ADDR_OFFSET) &= ~KEYS_BITS;
-}
-
-void Segs7_init(void)
-{
-        PIO1_REG(DIR_ADDR_OFFSET) |= SEG7_BITS;
-        PIO1_REG(SET_ADDR_OFFSET) |= SEG7_BITS;
-}
 
 uint32_t Switchs_read(void)
 {
-        uint32_t switches = PIO0_ADDR & SWITCHS_BITS;
+        uint32_t switches = PIO0_REG(SWICH_REG) & SWICH_REG;
         return switches;
 }
 
 void Leds_write(uint32_t value)
 {
-        uint32_t value_to_copy = PIO0_ADDR & ~LEDS_BITS;
-        PIO0_REG(SET_ADDR_OFFSET) = (value << LED_REG) | value_to_copy;
+        uint32_t value_to_copy = PIO0_REG(LED_REG) & LED_MASK;
+        PIO0_REG(LED_REG) = value | value_to_copy;
 }
 
 void Leds_set(uint32_t maskleds)
 {
-	PIO0_REG(CLR_ADDR_OFFSET) = LEDS_BITS;
-        PIO0_REG(SET_ADDR_OFFSET) = maskleds << LED_REG;
+
+        PIO0_REG(LED_REG) = maskleds;
 }
 
 void Leds_clear(uint32_t maskleds)
 {
-    PIO0_REG(CLR_ADDR_OFFSET) = maskleds << LED_REG;
-}
-
-
-void Leds_toggle(uint32_t maskleds)
-{
-	uint32_t leds_value = PIO0_ADDR & LEDS_BITS;
-        PIO0_REG(CLR_ADDR_OFFSET) = leds_value & (maskleds << LED_REG);
-        PIO0_REG(SET_ADDR_OFFSET) = ~leds_value & (maskleds << LED_REG);
+        uint32_t leds_value = PIO0_REG(LED_REG) & LED_MASK;
+        PIO0_REG(LED_REG) = maskleds & ~leds_value;
 }
 
 bool Key_read(int key_number)
 {
-        return (PIO0_ADDR & (1 << (key_number + KEY_REG)));
-}
-
-void Seg7_write(int seg7_number, uint32_t value)
-{
-        PIO1_REG(SET_ADDR_OFFSET) = SEG7_VALUE <<(seg7_number * SEG7_REG_OFFSET);
-        PIO1_REG(CLR_ADDR_OFFSET) = value << (seg7_number * SEG7_REG_OFFSET);
-}
-
-void Seg7_write_hex(int seg7_number, uint32_t value)
-{
-        Seg7_write(seg7_number, hexa[value]);
+        return (PIO0_REG(KEY_REG) & (1 << key_number));
 }
