@@ -8,8 +8,8 @@
  *****************************************************************************************
  *
  * File                 : hps_application.c
- * Author               : 
- * Date                 : 
+ * Author               :
+ * Date                 :
  *
  * Context              : ARE lab
  *
@@ -21,7 +21,7 @@
  * Ver    Date        Student      Comments
  * 1.0    8.12.2023   CCO JML      first version of lab 5 application
  *
-*****************************************************************************************/
+ *****************************************************************************************/
 #include <stdint.h>
 #include <stdbool.h>
 #include <stdio.h>
@@ -49,14 +49,11 @@ static uint32_t nbrs[4];
 #define NB_BITS_MASK 0x3FFFFF
 #define NB_BITS_CODE_MASK 0xC00000
 
-
 #define INIT_GEN_REG 0x10
 #define GEN_BIT 0x10
 #define RESET_BIT 0x01
 
 #define MODE_DELAY_REG 0x14
-
-
 
 /* controle reg for nbr generation */
 #define nbr_gen_reg 0x18
@@ -70,76 +67,77 @@ static uint32_t nbrs[4];
 
 /**
  * @brief Select mode based on switches
- * 
+ *
  * @param switches
  * @return true if automatic mode
-*/
-bool mode_select(uint32_t switches){
+ */
+bool mode_select(uint32_t switches)
+{
     return (switches >> 7) & 0x1;
 }
 
 /**
  * @brief Select speed based on switches
- * 
+ *
  * @param switches
  * @return speed
-*/
-uint8_t speed_select(uint32_t switches){
+ */
+uint8_t speed_select(uint32_t switches)
+{
     return switches >> 8;
 }
 
 /**
  * @brief Select acquisition mode based on switches
- * 
+ *
  * @param switches
  * @return true if reliable
-*/
-bool acquisition_mode_select(uint32_t switches){
+ */
+bool acquisition_mode_select(uint32_t switches)
+{
     return switches & 0x1;
 }
 
 /**
  * @brief Set mode and speed
- * 
+ *
  * @param mode
  * @param speed
-*/
-void mode_set(bool mode, uint8_t speed){
+ */
+void mode_set(bool mode, uint8_t speed)
+{
     AXI_LW_REG(MODE_DELAY_REG) = (mode << 5) | speed;
 }
 
-uint8_t get_status(){
+/**
+ * @brief Get status
+ *
+ * @return status
+ */
+uint8_t get_status()
+{
     return AXI_LW_REG(0x10) & 0x3;
 }
 
-int main(void){
-    
-    /* Set Default values on LEDS and hex display */
-    Leds_clear(LED_MASK);
+int main(void)
+{
 
-     /* display ID on console */
+    /* display ID on console */
     printf("ID: %lx\n", AXI_LW_REG(0));
 
     /* display our ID */
     printf("ID: %lx\n", PIO0_ADDR);
 
+    /* Set Default values on LEDS and hex display */
+    Leds_clear(LED_MASK);
+
     /* set our base mode based on switches */
-    uint8_t switches = Switchs_read();
 
-    /* mode is switch 7 0 manual and 1 automatic */
-    mode =  mode_select(switches);
-
-    /* speed is switches 8 and 9 */
-    speed = speed_select(switches);
-
-    /* acquisition mode is switches 0 */
-    acquisition_mode = acquisition_mode_select(switches);
-
-    uint8_t somme;
+    uint8_t switches;
     uint8_t status;
     uint32_t errors = 0;
 
-     while (true)
+    while (true)
     {
 
         switches = Switchs_read();
@@ -171,28 +169,41 @@ int main(void){
         }
 
         /* check if the load key is pressed */
-        if ((Key_read(2) == 0) )
+        if ((Key_read(2) == 0))
         {
-                // set reliable acquisition mode
-            if(acquisition_mode)
-                AXI_LW_REG(acquisition_mode_reg)=1;//notre valeur
-            
+            /* set reliable acquisition mode ask for a picture of the system */
+            if (acquisition_mode)
+                AXI_LW_REG(acquisition_mode_reg) = 0x1;
+
+            /* get the numbers */
+
+            /*
+             * we could use a for loop to read N numbers using numbers offset instead of addresses if they are contigous in memory
+             for (int i = 0; i < N; i++)
+                nbrs[i] = AXI_LW_REG(Na + i * 4) && NB_BITS_MASK;
+            */
 
             nbrs[0] = AXI_LW_REG(Na) && NB_BITS_MASK;
             nbrs[1] = AXI_LW_REG(Nb) && NB_BITS_MASK;
             nbrs[2] = AXI_LW_REG(Nc) && NB_BITS_MASK;
+
+            /* Nd is the sum */
             nbrs[3] = AXI_LW_REG(Nd) && NB_BITS_MASK;
 
-            somme = nbrs[3];
             status = get_status();
-            /* compare number */
-            if (somme !=  nbrs[0] + nbrs[1] + nbrs[2]){
-                /* couleurs */
-                printf("ER : status: %d, somme: %d, nbr_a: %d, nbr_b: %d, nbr_c: %d, nbr_d: %d\n", status, somme, nbrs[0], nbrs[1], nbrs[2], somme);
+
+            if (acquisition_mode)
+                AXI_LW_REG(acquisition_mode_reg) = 0x0;
+
+            /* compare the numbers */
+            if (somme != nbrs[0] + nbrs[1] + nbrs[2])
+            {
+                printf("ER : status: %d, somme: %d, nbr_a: %d, nbr_b: %d, nbr_c: %d, nbr_d: %d\n", status, nbrs[3], nbrs[0], nbrs[1], nbrs[2], nbrs[3]);
                 printf("ER : nombre d'erreur cumulées: %d\n", ++errors);
-            }else{
-                printf("OK : status: %d, somme: %d, nbr_a: %d, nbr_b: %d, nbr_c: %d, nbr_d: %d\n", status, somme, nbrs[0], nbrs[1], nbrs[2], somme);
-            
+            }
+            else
+            {
+                printf("OK : status: %d, somme: %d, nbr_a: %d, nbr_b: %d, nbr_c: %d, nbr_d: %d\n", status, nbrs[3], nbrs[0], nbrs[1], nbrs[2], nbrs[3]);
             }
         }
 
@@ -201,6 +212,5 @@ int main(void){
             key0_pressed = 1;
         if (Key_read(1) == 1)
             key1_pressed = 1;
-    
     }
 }
