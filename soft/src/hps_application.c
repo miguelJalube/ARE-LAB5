@@ -105,7 +105,7 @@ bool acquisition_mode_select(uint32_t switches)
  */
 void mode_set(bool mode, uint8_t speed)
 {
-    PIO0_REG(MODE_DELAY_REG) = (mode << 5) | speed;
+    PIO0_REG(MODE_DELAY_REG) = (mode << 4) | speed;
 }
 
 /**

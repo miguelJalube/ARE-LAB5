@@ -106,25 +106,57 @@ architecture rtl of avl_user_interface is
     signal addr_int_s       : integer;
     signal avl_readdata_s      : std_logic_vector(avl_readdata_o'range);
     signal avl_readdatavalid_s : std_logic;
-
-begin
+    signal mem_s : std_logic;
+    signal current_state,next_state : State_type;
+    begin
     -- Avalon address cast as integer for Reading & Writing address decoding simplicities
   addr_int_s <= to_integer(unsigned(avl_address_i));
+
+  nbrs_save_s <= mem_s when status_s(1) else '1'; 
+
+  MSS_MEM: process (status_s(1),current_state)
+  begin
+    status_s(0) <= '0';
+    mem_s <= '0';
+    next_state <= INIT;
+
+    case current_state is
+      when INIT =>
+        if status_s(1) = '1' then
+          next_state <= MEM_UP;
+        end if;
+      when MEM_UP =>
+          mem_s <= '1';
+          next_state <= MEM_DOWN;
+      when MEM_DOWN =>
+        status_s(0) <= '1';
+        if status_s(1) = '0' then
+          next_state <= INIT;
+        else
+          next_state <= MEM_DOWN;
+        end if;
+      when others => INIT;
+    end case;
+ 
+  end process;
 
   number_gen: process (avl_clk_i, avl_reset_i)
   begin 
     if avl_reset_i = '1' then
+      current_state <= INIT;
       nbr_a_s <= (others => '0');
       nbr_b_s <= (others => '0');
       nbr_c_s <= (others => '0');
       nbr_d_s <= (others => '0');
     elsif rising_edge(avl_clk_i) then
-      --ajouter un if pour le mode auto fiable    
+      current_state <= next_state;    
+      if nbrs_save_s = '1' then
           nbr_a_s <= nbr_a_i;
           nbr_b_s <= nbr_b_i;
           nbr_c_s <= nbr_c_i;
           nbr_d_s <= nbr_d_i;
       end if;
+    end if;
   end process;
 
     -- Read access part
@@ -194,6 +226,8 @@ begin
 
             when 5 => mode_gen_s       <= avl_writedata_i(4);
                       delay_s          <= avl_writedata_i(1 downto 0);
+
+            when 7 => status(1) <= avl_writedata_i(0);
             
             --add func 2 0x1C for reliable
 
