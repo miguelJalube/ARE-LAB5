@@ -63,7 +63,12 @@ end avl_user_interface;
 architecture rtl of avl_user_interface is
     --| Components declaration |--------------------------------------------------------------
 
-
+    --| Types declaration      |--------------------------------------------------------------
+    type state_type is (
+      INIT, 
+      MEM_UP, 
+      MEM_DOWN
+    );
     
     constant DBG_RD_CST : std_logic_vector(avl_readdata_o'range) := x"10101010";
     constant DBG_WR_CST : std_logic_vector(avl_readdata_o'range) := x"09090909";
@@ -107,7 +112,7 @@ architecture rtl of avl_user_interface is
     signal avl_readdata_s      : std_logic_vector(avl_readdata_o'range);
     signal avl_readdatavalid_s : std_logic;
     signal mem_s : std_logic;
-    signal current_state,next_state : State_type;
+    signal current_state,next_state : state_type;
     begin
     -- Avalon address cast as integer for Reading & Writing address decoding simplicities
   addr_int_s <= to_integer(unsigned(avl_address_i));
