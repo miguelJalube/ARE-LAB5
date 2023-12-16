@@ -117,30 +117,30 @@ architecture rtl of avl_user_interface is
     -- Avalon address cast as integer for Reading & Writing address decoding simplicities
   addr_int_s <= to_integer(unsigned(avl_address_i));
 
-  nbrs_save_s <= mem_s when status_s(1) else '1'; 
+  nbrs_save_s <= mem_s when (status1_s = '0') else '1';
 
-  MSS_MEM: process (status_s(1),current_state)
+
+  MSS_MEM: process (status1_s,current_state)
   begin
-    status_s(0) <= '0';
+    status0_s <= '0';
     mem_s <= '0';
     next_state <= INIT;
 
     case current_state is
       when INIT =>
-        if status_s(1) = '1' then
+        if status1_s = '1' then
           next_state <= MEM_UP;
         end if;
       when MEM_UP =>
           mem_s <= '1';
           next_state <= MEM_DOWN;
       when MEM_DOWN =>
-        status_s(0) <= '1';
-        if status_s(1) = '0' then
+        status0_s <= '1';
+        if status1_s = '0' then
           next_state <= INIT;
         else
           next_state <= MEM_DOWN;
         end if;
-      when others => INIT;
     end case;
  
   end process;
@@ -172,7 +172,7 @@ architecture rtl of avl_user_interface is
       if avl_reset_i = '1' then
         avl_readdatavalid_s <= '0';
         avl_readdata_s <= (others => '0');
-        status_s(1) <= '0';
+        status1_s <= '0';
 
       elsif rising_edge(avl_clk_i) then
         -- By default, fully set read data to 0 & later on, affect only concerned part
@@ -191,7 +191,7 @@ architecture rtl of avl_user_interface is
 
             when 3       => avl_readdata_s(led_s'range)            <= led_s;
 
-            when 4       => avl_readdata_s(status_s'range)         <= status_s;
+            when 4       => avl_readdata_s(1 downto 0)         <= status1_s & status0_s;
 
             when 5       => avl_readdata_s(4 downto 0)     <= mode_gen_s & "00" & delay_s;
             
@@ -219,7 +219,8 @@ architecture rtl of avl_user_interface is
 
         new_nbr_s           <= '0';
         init_nbr_s          <= '0';
-
+		  
+		    status1_s			<= '0';
       elsif rising_edge(avl_clk_i) then
         -- Update when write wanted
         if avl_write_i = '1' then
@@ -232,7 +233,7 @@ architecture rtl of avl_user_interface is
             when 5 => mode_gen_s       <= avl_writedata_i(4);
                       delay_s          <= avl_writedata_i(1 downto 0);
 
-            when 7 => status(1) <= avl_writedata_i(0);
+            when 7 => status1_s <= avl_writedata_i(0);
             
             --add func 2 0x1C for reliable
 
