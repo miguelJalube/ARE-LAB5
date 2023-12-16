@@ -150,7 +150,6 @@ int main(void)
         speed = speed_select(switches);
         /* acquisition mode is switches 0 */
         acquisition_mode = acquisition_mode_select(switches);
-
         /* set mode */
         mode_set(mode, speed);
 
