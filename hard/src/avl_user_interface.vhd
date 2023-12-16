@@ -135,11 +135,13 @@ begin
       if avl_reset_i = '1' then
         avl_readdatavalid_s <= '0';
         avl_readdata_s <= (others => '0');
+        status_s(1) <= '0';
 
       elsif rising_edge(avl_clk_i) then
         -- By default, fully set read data to 0 & later on, affect only concerned part
         avl_readdatavalid_s <= avl_read_i;
         avl_readdata_s <= (others => '0');
+        
 
         -- Update when read wanted
         if avl_read_i = '1' then
