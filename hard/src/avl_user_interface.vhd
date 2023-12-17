@@ -123,39 +123,17 @@ architecture rtl of avl_user_interface is
     -- Avalon address cast as integer for Reading & Writing address decoding simplicities
     addr_int_s <= to_integer(unsigned(avl_address_i));
 
-  nbrs_save_s <= mem_s when status_s(1) else '1'; 
-
-
-  number_gen: process (avl_clk_i, avl_reset_i)
-  begin 
-    if avl_reset_i = '1' then
-      current_state <= INIT;
-      nbr_a_s <= (others => '0');
-      nbr_b_s <= (others => '0');
-      nbr_c_s <= (others => '0');
-      nbr_d_s <= (others => '0');
-    elsif rising_edge(avl_clk_i) then
-      current_state <= next_state;    
-      if nbrs_save_s = '1' then
-          nbr_a_s <= nbr_a_i;
-          nbr_b_s <= nbr_b_i;
-          nbr_c_s <= nbr_c_i;
-          nbr_d_s <= nbr_d_i;
-      end if;
-    end if;
-  end process;
-
     --| Number generator saving process |-----------------------------------------------------
-    nbrs_save_s <= mem_s when (status1_s = '0') else '1';
+    nbrs_save_s <= mem_s when status_s(1) else '1'; 
 
-    --------------------------------------------------------------------------------------------
     number_gen: process (avl_clk_i, avl_reset_i)
-    --------------------------------------------------------------------------------------------
     begin 
       if avl_reset_i = '1' then
-        avl_readdatavalid_s <= '0';
-        avl_readdata_s <= (others => '0');
-
+        current_state <= INIT;
+        nbr_a_s <= (others => '0');
+        nbr_b_s <= (others => '0');
+        nbr_c_s <= (others => '0');
+        nbr_d_s <= (others => '0');
       elsif rising_edge(avl_clk_i) then
         current_state <= next_state;    
         if nbrs_save_s = '1' then
@@ -167,6 +145,7 @@ architecture rtl of avl_user_interface is
       end if;
     end process;
 
+
       -- Read access part
       ---------------------------------------------------------------------------
       read_channel: process (avl_clk_i, avl_reset_i)
@@ -175,7 +154,6 @@ architecture rtl of avl_user_interface is
         if avl_reset_i = '1' then
           avl_readdatavalid_s <= '0';
           avl_readdata_s <= (others => '0');
-          status1_s <= '0';
 
         elsif rising_edge(avl_clk_i) then
           -- By default, fully set read data to 0 & later on, affect only concerned part
@@ -195,7 +173,7 @@ architecture rtl of avl_user_interface is
               -- LEDs
               when 3       => avl_readdata_s(led_s'range)            <= led_s;
               -- Status
-              when 4       => avl_readdata_s(1 downto 0)         <= status1_s & status0_s;
+              when 4       => avl_readdata_s(1 downto 0)         <= status_s;
               -- Mode & delay
               when 5       => avl_readdata_s(4 downto 0)     <= mode_gen_s & "00" & delay_s;
               
@@ -204,17 +182,9 @@ architecture rtl of avl_user_interface is
               when 10      => avl_readdata_s(nbr_c_s'high+CODE_NC'length downto nbr_c_s'low)          <= CODE_NC & nbr_c_s;
               when 11      => avl_readdata_s(nbr_d_s'high+CODE_ND'length downto nbr_d_s'low)          <= CODE_ND & nbr_d_s;
 
-            when 4       => avl_readdata_s(status_s'range)         <= status_s;
-
-            when 5       => avl_readdata_s(4 downto 0)     <= mode_gen_s & "00" & delay_s;
-            
-            when 8       => avl_readdata_s(nbr_a_s'high+CODE_NA'length downto nbr_a_s'low)          <= CODE_NA & nbr_a_s;
-            when 9       => avl_readdata_s(nbr_b_s'high+CODE_NB'length downto nbr_b_s'low)          <= CODE_NB & nbr_b_s;
-            when 10      => avl_readdata_s(nbr_c_s'high+CODE_NC'length downto nbr_c_s'low)          <= CODE_NC & nbr_c_s;
-            when 11      => avl_readdata_s(nbr_d_s'high+CODE_ND'length downto nbr_d_s'low)          <= CODE_ND & nbr_d_s;
-
-            when others  => avl_readdata_s    <= DBG_RD_CST;
-          end case;
+              when others  => avl_readdata_s    <= DBG_RD_CST;
+            end case;
+          end if;
         end if;
       end process;
 
@@ -229,27 +199,29 @@ architecture rtl of avl_user_interface is
           mode_gen_s          <= '0';
           delay_s             <= (others => '0');
 
-        new_nbr_s           <= '0';
-        init_nbr_s          <= '0';
-      elsif rising_edge(avl_clk_i) then
-        -- Update when write wanted
-        if avl_write_i = '1' then
-          case addr_int_s is
-            when 3     => led_s            <= avl_writedata_i(led_s'range);
+          new_nbr_s           <= '0';
+          init_nbr_s          <= '0';
 
-              when 4     => new_nbr_s        <= avl_writedata_i(4);
-                            init_nbr_s       <= avl_writedata_i(0);
+          status_s(1)            <= '0';
+        elsif rising_edge(avl_clk_i) then
+          -- Update when write wanted
+          if avl_write_i = '1' then
+            case addr_int_s is
+              when 3     => led_s            <= avl_writedata_i(led_s'range);
 
-              when 5 => mode_gen_s       <= avl_writedata_i(4);
-                        delay_s          <= avl_writedata_i(1 downto 0);
+                when 4     => new_nbr_s        <= avl_writedata_i(4);
+                              init_nbr_s       <= avl_writedata_i(0);
 
-            when 7 => status_s(1) <= avl_writedata_i(0);
-            
+                when 5 => mode_gen_s       <= avl_writedata_i(4);
+                          delay_s          <= avl_writedata_i(1 downto 0);
 
-              when others            => NULL;
-              --avl_readdata_s   <= DBG_WR_CST; -- Used during simulation
-            end case;
-          end if;
+              when 7 => status_s(1) <= avl_writedata_i(0);
+
+
+                when others            => NULL;
+                --avl_readdata_s   <= DBG_WR_CST; -- Used during simulation
+              end case;
+            end if;
         end if;
       end process;
 
@@ -278,9 +250,8 @@ architecture rtl of avl_user_interface is
           next_state <= MEM_DOWN;
         end if;
       when others => 
-      next_state <= INIT;
+        next_state <= INIT;
     end case;
- 
   end process;
 
     -- Connection internal signals to real signals
