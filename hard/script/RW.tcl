@@ -1,0 +1,3 @@
+            # const 1,  const2,        allume toutes leds,   read switchs,  read boutons,  set mode manuel,    new nbr,             read nbdr,     new nbr,             read nbr,      mode auto,           set delay 00,        read nbr,      set delay 01,        read nbr,      set delay 10,        read nbr,      set delay 11, read nbr
+
+set Program {{Read 0x0} {Read 0x10000} {Write 0x1000c 0x3ff} {Read 0x10008} {Read 0x10004} {Write 0x10014 0x0} {Write 0x10010 0x10} {Read 0x10020} {Write 0x10010 0x00} {Write 0x10010 0x10} {Read 0x10020} {Write 0x10010 0x00} {Write 0x10010 0x10} {Read 0x10020} {Write 0x10010 0x00} {Write 0x10010 0x10} {Read 0x10020} {Write 0x10014 0x13} {Read 0x10020} {Read 0x10020} {Read 0x10020} {Read 0x10020} {Read 0x10020}}
