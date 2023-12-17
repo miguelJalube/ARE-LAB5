@@ -359,6 +359,9 @@ Les tests de la partie une ont donnée des résultats corrects. Le chronogramme 
 13. Lecture du nombre généré (jusqu'à voir un changement)
 
 ![chronogramme 1](_pics/chrono_1.png){ width=80% }
+
+Comme on peut voir dans le chronogramme, on demande un nombre en mettant le signal new_nbr à 1 puis lorsque l'on a lu le nombre on met le signal new_nbr à 0 pour le mode manuel. Dans le deuxième chronogramme on peut voir le fonctionnement du mode automatique. La fréquence est définie à 1 MHz et on peut voir à la fin du chronogramme la génération de nouveau nombres sans avoir besoin du signal new_nbr.
+
 ![chronogramme 2](_pics/chrono_2.png){ width=80% }
 
 Tests TCL/TK :
