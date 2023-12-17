@@ -159,6 +159,7 @@ int main(void)
         {
             PIO0_REG(INIT_GEN_REG) = RESET_BIT;
             key0_pressed = 0;
+            PIO0_REG(INIT_GEN_REG) = 0x0;
         }
 
         /* in manual mode generate 4 new numbers */
