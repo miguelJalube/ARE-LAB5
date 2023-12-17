@@ -346,7 +346,29 @@ Ceci à été fait pour ne pas avoir à gérer cette pulse grâce a une machine 
 \pagebreak
 ## **Test**
 
-# TODO : mettre les photos des tests
+Les tests de la partie une ont donnée des résultats corrects. Le chronogramme montre cette liste d'actions dans l'ordre :
+1. Initialisation de l'interface
+2. Lecture de l'ID en 0x0
+3. Lecture de l'ID en 0x10000
+4. Allumage de toutes les LEDs
+5. Lecture des switchs (SW4 activé)
+6. Lecture des boutons (KEY0 activé)
+7. Passage en mode manuel
+8. Génération d'un nouveau nombre
+9. Lecture du nombre généré
+10. Génération d'un nouveau nombre
+11. Lecture du nombre généré
+12. Passage en mode automatique et frequence 1 MHz
+13. Lecture du nombre généré (jusqu'à voir un changement)
+
+![chronogramme 1](_pics/chrono_1.png){ width=80% }
+
+Comme on peut voir dans le chronogramme, on demande un nombre en mettant le signal new_nbr à 1 puis lorsque l'on a lu le nombre on met le signal new_nbr à 0 pour le mode manuel. Dans le deuxième chronogramme on peut voir le fonctionnement du mode automatique. La fréquence est définie à 1 MHz et on peut voir à la fin du chronogramme la génération de nouveau nombres sans avoir besoin du signal new_nbr.
+
+![chronogramme 2](_pics/chrono_2.png){ width=80% }
+
+Tests TCL/TK :
+![tcl tk](_pics/tcltk.png){ width=80% } 
 
 ## **Conclusion**
 
