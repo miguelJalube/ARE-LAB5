@@ -33,8 +33,8 @@ Unité d'enseignement: **ARE**
 
 Auteur(s):
 
-- **JALUBE Miguel**
 - **CECCHET Costantino**
+- **JALUBE Miguel**
 
 Professeur:
 
@@ -96,6 +96,45 @@ Comme le montre le bloc de l'interface a concevoir:
 
 ![bloc_schem.png](_pics/bloc_schem.png){ width=90% }
 
+\raggedright
+
+\hfill\break
+
+Elle ne reçoit que 14bits pour l'adresse.
+
+Ceci s'explique par le fait que le bus de données est sur **32bits**. Dès lors, une valeur 32bits doit pouvoir s'adresser de telles façons à accèder à chacun de ces bytes, soit:
+
+\small
+
+```shell
+|   REGISTRE     32     BITS    |
+| ----------------------------- |
+| BYTE3 | BYTE2 | BYTE1 | BYTE0 |
+|      0x3     0x2     0x1     0x0 Offset à partir de l'adr. de base du reg.
+```
+
+\normalsize
+
+\hfill\break
+
+Ce faisant, les adresses dans le plan d'adressage doivent être alignées sur 2bits, autrement dit, alignées sur 4. **Ce qui enlève les 2 premiers bits de poids faibles.**
+
+\pagebreak
+
+Ensuite, le manuel de référence technique du processeur nous indique que le bus AXI lightweight débute à l'adresse 0xFF20'0000, avec une mémoire allouée de 2MB. **Il en est déduisible que les 11 derniers bits de poids forts sont décodés par ce dernier.**
+
+De plus, la zone attribuée aux étudiants est présenté avec le tableau ci-dessous:
+
+\center
+
+\small
+
+| Offset on bus AXI lightweight HPS2FGPA | Fonctionnalités |
+| :-------------: | --------------- |
+| 0x00_0000 - 0x00_0003 | Constante ID 32Bits (Read only) |
+| 0x00_0004 - 0x00_FFFF | reserved |
+| **0x01_0000 - 0x01_FFFF** | **Zone à disposition des étudiants** |
+| 0x02_0000 - 0x1F_FFFF | not used |
 
 \normalsize
 
@@ -105,25 +144,26 @@ Une constante ID de 32bits est retrouvée, mais cette dernière est implémenté
 
 \hfill\break
 
-Le plan d'adressage a ensuite été définit comme suit:
+Le plan d'adressage aiaint comme adresse de base 0xFF200000 a ensuite été définit comme suit:
 
-| Address (CPU Side) [16..0] | Address (Itf side) [15..2] | Definition | R/W |
+| Address (CPU Side) [16..0] | Address (Itf side) [15..2] | Definition | R/W | BITS |
 | :----------: | :---------: | :------------- | :-: |
-| 0x1_0000 | 0x0000 | Constant ID (**0xDEADBEEF**) | R |
-| 0x1_0010 | 0x0004 | IN: Keys | R |
-| 0x1_0008 | 0x0008 | IN: Switches | R |
-| 0x1_0020 | 0x000C | OUT: LEDs | R/W |
-| 0x1_0200 | 0x0010 | *reserved* | - |
-| 0x1_0400 | 0x0014 | *reserved* | - |
-| 0x1_.... | 0x0018 | *reserved* | - |
-| 0x1_.... | 0x001c | *reserved* | - |
-| 0x1_FFF8 | 0x0020 | *reserved* | - |
-| 0x1_FFFC | 0x0024 | *reserved* | - |
-| 0x1_1000 | 0x0028 | *reserved* | - |
-| 0x1_2000 | 0x002C | *reserved* | - |
-| 0x1_FFFC | 0x1000 | *reserved* | - |
+| 0x1_0000 | 0x0000 | Constant ID (**0xDEADBEEF**) | R | [31..0] |
+| 0x1_0004 | 0x0001 | IN: Keys | R | [3..0]
+| 0x1_0008 | 0x0003 | IN: Switches | R | [9..0] |
+| 0x1_000C | 0x0003 | OUT/IN: LEDs | R/W | [9..0] |
+| 0x1_0010 | 0x0004 | OUT/IN: Status/Config.[^1] | R/W | [1..0]/[4] [0] |
+| 0x1_0014 | 0x0005 | OUT/IN: Mode/Speed | R/W | [4] [1..0] |
+| 0x1_0018 | 0x0006 | *unused* | - |
+| 0x1_001C | 0x0007 | OUT: Photo | W | [0] |
+| 0x1_0020 | 0x0008 | IN: nbr_a | R | [31..0] |
+| 0x1_0024 | 0x009 | IN: nbr_b | R | [31..0] |
+| 0x1_0028 | 0x0010 | IN: nbr_c | R | [31..0] |
+| 0x1_002C | 0x0011 | IN: nbr_d | R | [31..0] |
+| 0x1_0030 | 0x0012 | *reserved* | - | - |
+| 0x1_003C | 0x1000 | *not used* | - | - |
 
-[^1]: *status* est *read only*, car ces bits indiquent si la MAX10 est prête à l'emploi ou non.
+[^1]: *Status/Config.*: en suivant le plan d'adressage fourni par les responsables de cours, les bits de status sont *read only* et les bits de configuration sont *write only*.
 
 \pagebreak
 
@@ -131,47 +171,27 @@ Justification du plan d'adressage:
 
 \hfill\break
 
-- La première constante permet d'identifier l'interface à concevoir, conformément à la donnée du laboratoire.
+- La première constante permet d’identifier l’interface à concevoir,
+conformément à la donnée du laboratoire
 
-- La seconde n'est présente qu'à des fins de vérifications intermédiaires, portant sur la lecture et l'écriture sur le bus.
+- Pour les offset 0x18 et 0x1C, il a été décidé de n'utiliser que l'offset 0x1C et son bit 0 affin de gérer la prise de photo des registres 0x20 à 0x2C. Nous avons décidé de ne pas utiliser l'offset 0x18, car la prise de photo et son aquittement peuvent être gérés par le bit 0 de l'offset 0x1C.
 
-- Les entrées utilisateurs (switches & bouttons) ont été séparées, afin d'éviter d'effectuer du masquage et des shift pour obtenir le périphérique désiré.
 
-- Comme il a été définit un registre 32bits pour les LEDs de la MAX10, les LEDs de la DE1SOC se trouvent également isolée dans une adresse.
-
-- Pour les bits de configuration de la MAX10, ils ont été groupés. L'ordre était de mettre les bits de status au plus haut (selon les éventuels autres bits de config.), car ces derniers ne seront utilisés qu'à l'enclenchement du programme.
-
-  Les bits de sélection de la zone active de la MAX10 est au plus bas, pour n'avoir qu'à faire un masquage pour obtenir la valeur.
-
-- Pour finir, le bit *"busy"* représentant le *write\_enable* a été isolé, afin que le programme puisse attendre sur la fin d'écriture avec une simple boucle:
-
-```c
-    while( BUSY_REG ) ;
-```
-
-\hfill\break
-
-Quant aux adresses, avec le nombre de registres définis et la taille à disposition, il a été décidé de faire en sorte de n'avoir qu'un bit actif par registre.
 
 \pagebreak
 
 ### **Réalisation du circuit**
 
-La circuiterie a été coupée en 3 parties majeures; **lecture**, **écriture** et une troisième pour la gestion de la **validité d'écriture sur la MAX10** (signal *lp36_we_o*).
+La circuiterie a été coupée en 3 parties majeures; **lecture**, **écriture** et une machine d'état pour la lecture fiable.
 
 \center
 
+# TODO : mettre le schéma de l'interface
 ![interface_split](_pics/interface_split.jpg){ width=90% }
 
 \raggedright
 
 \hfill\break
-
-*Note:* Les interrupteurs et les boutons arrivant sur l'interface ont été syncronisés au niveau de la DE1. Ceci dans le but de ne pas perturber la simulation, lorsque l'on change la valeur de ces derniers entre 2 lectures consécutives.
-
-\hfill\break
-
-De plus, comme les portes trois-états ne sont pas disponibles dans une puce FPGA, il faut passer par du dé/multiplexage.
 
 \pagebreak
 
@@ -183,6 +203,7 @@ Ce canal possède un DEMUX qui permet de choisir lequel des 4 registres écrivab
 
 \hfill\break
 
+# TODO : mettre le schéma du DEMUX READ
 Le schéma résultant se présente ainsi:
 
 \center
@@ -191,13 +212,6 @@ Le schéma résultant se présente ainsi:
 
 \raggedright
 
-\hfill\break
-
-Dans la description du *design*, c'est ce canal qui traite le reset des différents registres.
-
-\hfill\break
-
-*Remarque:* Le registre de la constante ID de **debug** se reset à sa valeur initiale (`0xCAFE0369`) et non pas à 0.
 
 \pagebreak
 
@@ -219,7 +233,7 @@ En voici son schéma:
 
 \hfill\break
 
-Lors de la lecture d'une donnée, un décalage d'une période d'horloge est effectuée pour obtenir le signal *read_datavalid*. 
+Lors de la lecture d'une donnée, un décalage d'une période d'horloge est effectuée pour obtenir le signal *avl_read_datavalid* à partir du signal *avl_read_i*.
 
 \pagebreak
 
@@ -227,59 +241,16 @@ Lors de la lecture d'une donnée, un décalage d'une période d'horloge est effe
 
 \
 
-Pour l'écriture de la MAX10, la création d'une machine d'état est nécessaire. 
-
-Selon les spécifications du bus, le signal *lp36_we* doit être actif pendant une période **d'au moins 1\[us\]**, afin de valider une écriture fiable des bits de sélections et des données des LEDs de la MAX10.
+Pour la lecture fiable, une machine d'état a été implémentée, afin de gérer un signal de prise de photo, ainsi que son acquittement.
 
 \hfill\break
 
-Voici le diagramme de la machine d'état, où les '0' et '1' isolés sont les valeurs de *lp36\_enable* à chaque état:
+Voici le diagramme de la machine d'état.
 
 \center
 
+# TODO : mettre le schéma de la machine d'état
 ![mss](_pics/MSS.jpg){ width=60% }
-
-\raggedright
-
-\hfill\break
-
-Pendant cette période de 1\[us\], le bit de *busyness* de notre interface est maintenu actif.
-
-Comme il sera possible de le voir en **[annexes](#mesures-write-enable)**, grâce à quelques mesures, le signal peut avoir quelques perturbations et a alors une légère gigue.
-
-C'est pourquoi, une marge de 10% (purement subjectif) a été prise en considération, lors du calcul de la limite à compter.
-
-\hfill\break
-
-Pour la gestion de la *SM*, un compteur est implémenté, afin de compter le nombre de cycle nécessaire au maintien du signal.
-
-\pagebreak
-
-Initialement, la limite a compté respecte la règle: $\frac{T_{maintien}}{T_{clk}}$. Toutefois, comme le montre le diagramme d'état, le maintien du signal est fait dans 2 états, il faut donc diviser par le nombre d'états dans lesquels le maintien est fait.
-
-\hfill\break
-
-Le calcul est alors:
-
-\center
-
-$Limit = \frac{T_{maintien}}{T_{clk} * N_{states}}$
-
-avec: $T_{maintien}=1.1[us]$, $T_{clk}=\frac{1}{50'000'000}=20[ns]$ et $N_{states}=2$.
-
-\hfill\break
-
-\raggedright
-
-Et donc, avec transformation des valeurs en \[ns\], on obtient:
-
-\center
-
-$Limit = \frac{1'100}{20 * 2} = 27.5 \approx 28$
-
-\hfill\break
-
-$RealT_{maintien} = 28 * 20 * 2 = 1'120[ns] => 1.12[us]$
 
 \raggedright
 
@@ -295,6 +266,7 @@ Sous le report de synthétisation: `Fitter > Resource Section > Resource Utiliza
 
 \center
 
+# TODO : mettre le schéma de la synthèse et verifier les compteurs
 ![dedicated_registers](_pics/DedicatedLogicRegisters.png){ width=95% }
 
 \raggedright
@@ -303,19 +275,18 @@ Sous le report de synthétisation: `Fitter > Resource Section > Resource Utiliza
 
 Chaque registre peut être compté, afin de retrouver la valeur présente ci-dessus:
 
-| Column 1 | Size (bits) | Column 2 | Size (bits) |
+|  | Size (bits) | | Size (bits) |
 | :--------------- | :--: | :----------- | :--: |
-| Constante ID de debug | **32** | Sel + Status | **6** |
-| Données pour LP36 | **32** | Machine d'états  | **3** |
-| Registre de lecture | **32** | CS d'écriture sur MAX10 | **1** |
-| Données des LEDs sur DE1SoC | **10** | *write enable* | **1** |
-| Compteur de tempo. | **6** | / | / |
+| Constante ID | **32** |  Status | **2** |
+| New + Init | **2** | Mode + Speed  | **3** |
+| Nombres | **22\*4** | Données des LEDs sur DE1SoC | **10** |
+
 
 \hfill\break
 
 Ce qui amène alors à:
 
-$Dedicated Logic Registers = 32 + 32 + 32 + 10 + 6 + 6 + 3 + 1 + 1 = \boldsymbol 123$
+$Dedicated Logic Registers = 32 + 32 + 32 + 10 + 6 + 6 + 3 + 1 + 1 = \boldsymbol 121$
 
 \hfill\break
 
@@ -333,13 +304,10 @@ Voici leur test respectif:
 
 0. Test des lectures des IDs, ainsi que l'écriture de la constante de debug
 
-  - Test de deux lectures consécutives, en forçant les signaux nécessaires
-
 1. Test des lectures des entrées utilisateurs: Bouttons et interrupteurs
 
 2. Test de l'écriture et relecture des LEDs de la DE1
 
-3. Test de l'écriture, relecture des LEDs sur la MAX10, ainsi que le maintien de *lp36_we* soit active pendant 1\[us\]
 
 \hfill\break
 
@@ -349,11 +317,7 @@ Pour ne pas surcharger le rapport, l'analyse des chronogrammes, avec effet sur l
 
 ## **Programme C**
 
-Pour le programme, la base a été reprise du dernier laboratoire.
-
-\hfill\break
-
-En prémice du programme principale, un programme de test a été écrit (fichier: test_program.c.bak). Ceci dans le but de tester les accès aux différents registres, ainsi que leur utilisation propre (gestion luminosité des LEDs, lecture des interrupteurs, ...).
+Pour le programme, la base a été reprise du dernier laboratoire. Cependant, le programme a été modifié pour satisfaire les contraintes du cahier des charges.
 
 \hfill\break
 
@@ -365,25 +329,26 @@ Le module se contente du minimum pour cette interface, mais elle est facilement 
 
 Selon la compréhension du cahier des charges, voici quelques clarifications quant au comportement du programme:
 
-- Pression sur KEY3 -> extinction des LEDs
+- Lors de l'écriture sur les registre de initialisation et de reset pour le generateur de nombres, le programme cree une pulse sur  ce dernier.
+Ceci à été fait pour ne pas avoir à gérer cette pulse grâce a une machine d'état dans le vhdl.
 
-  Pour satisfaire ce point, il semblait plus naturel de garder les LEDs éteintes, tant que le bouton était maintenu pressé. À noter que durant la présentation, un pseudo PWM entre allumage et extinction de LEDs se créait sur la zone active de la MAX10.
+- Lors de la lecture des nombres en mode fiable, deux solutions ont été discutée avec le professeur:
 
-- Pression sur KEY2 -> Shift d'une taille de byte sur la gauche
+  - La première consiste à demander une prise de photo, et laisser a l'utilisateur la mission de lire les nombres avant de relancer une prise de photo. Cette solution est simple à implémenter.
 
-  Le mode décale la valeur des switchs de 8bits, tout en gardant les états des LEDs précédents. De plus, les autres LEDs que le groupe de 8bits sur lesquels les switchs sont reportés sont éteintes si KEY3 est pressé.
+  - La deuxième consiste à demander une prise de photo et d'attendre un aquittement de la part de l'utilisateur avant de pouvoir relancer une prise de photo. Cette solution est plus complexe à implémenter.
+
+  Nous avons implémenté cette solution, car elle est plus proche du cahier des charges.
 
 \pagebreak
+## **Test**
+
+# TODO : mettre les photos des tests
 
 ## **Conclusion**
 
 Pour conclure, le laboratoire a été réalisé avec succès! Le cahier des charges est rempli et tant le *design*, que le programme, sont tout 2 facilement modifiables si besoin.
 
-\hfill\break
-
-Après rédaction du rapport, 1 mitigation possibles serait de:
-
-- Grouper les états responsables du maintien de *lp36_we* en un seul, de sorte à compter avec une résolution de 1 le nombre de cycle pour atteindre la limite.
 
 \hfill\break
 

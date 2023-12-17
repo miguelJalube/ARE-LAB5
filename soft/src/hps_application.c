@@ -11,7 +11,7 @@
  * Author               :
  * Date                 :
  *
- * Context              : ARE lab
+ * Context              : ARE lab 5
  *
  *****************************************************************************************
  * Brief: Conception d'une interface évoluée sur le bus Avalon avec la carte DE1-SoC
@@ -20,13 +20,14 @@
  * Modifications :
  * Ver    Date        Student      Comments
  * 1.0    8.12.2023   CCO JML      first version of lab 5 application
+ * 1.1    17.12.2023  CCO JML      lab 5 reliable mode
  *
  *****************************************************************************************/
 #include <stdint.h>
 #include <stdbool.h>
 #include <stdio.h>
 #include "axi_lw.h"
-#include "pio_function.h"
+#include "interface.h"
 
 int __auto_semihosting;
 
