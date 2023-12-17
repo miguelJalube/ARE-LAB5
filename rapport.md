@@ -182,8 +182,8 @@ La circuiterie a été coupée en 3 parties majeures; **lecture**, **écriture**
 
 \center
 
-# TODO : mettre le schéma de l'interface
 ![interface_split](_pics/ff.jpg){ width=90% }
+(Pour une vue plus précise voir le document schema_bloc.pdf)
 
 \raggedright
 
