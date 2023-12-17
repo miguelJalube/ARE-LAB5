@@ -119,8 +119,6 @@ Ceci s'explique par le fait que le bus de données est sur **32bits**. Dès lors
 
 Ce faisant, les adresses dans le plan d'adressage doivent être alignées sur 2bits, autrement dit, alignées sur 4. **Ce qui enlève les 2 premiers bits de poids faibles.**
 
-\pagebreak
-
 Ensuite, le manuel de référence technique du processeur nous indique que le bus AXI lightweight débute à l'adresse 0xFF20'0000, avec une mémoire allouée de 2MB. **Il en est déduisible que les 11 derniers bits de poids forts sont décodés par ce dernier.**
 
 De plus, la zone attribuée aux étudiants est présenté avec le tableau ci-dessous:
@@ -176,9 +174,7 @@ conformément à la donnée du laboratoire
 
 - Pour les offset 0x18 et 0x1C, il a été décidé de n'utiliser que l'offset 0x1C et son bit 0 affin de gérer la prise de photo des registres 0x20 à 0x2C. Nous avons décidé de ne pas utiliser l'offset 0x18, car la prise de photo et son aquittement peuvent être gérés par le bit 0 de l'offset 0x1C.
 
-
-
-\pagebreak
+\hfill\break
 
 ### **Réalisation du circuit**
 
@@ -187,7 +183,7 @@ La circuiterie a été coupée en 3 parties majeures; **lecture**, **écriture**
 \center
 
 # TODO : mettre le schéma de l'interface
-![interface_split](_pics/interface_split.jpg){ width=90% }
+![interface_split](_pics/ff.jpg){ width=90% }
 
 \raggedright
 
@@ -249,11 +245,16 @@ Voici le diagramme de la machine d'état.
 
 \center
 
-# TODO : mettre le schéma de la machine d'état
-![mss](_pics/MSS.jpg){ width=60% }
+![MSS](_pics/mss.png){ width=90% }
 
 \raggedright
 
+Cette machine a été concue sur la base de ces diagrammes de flux:
+
+\center
+![Diagrame de flux](_pics/flux.png){ width=100% }
+
+\raggedright
 \pagebreak
 
 ### Synthèse
@@ -266,8 +267,8 @@ Sous le report de synthétisation: `Fitter > Resource Section > Resource Utiliza
 
 \center
 
-# TODO : mettre le schéma de la synthèse et verifier les compteurs
-![dedicated_registers](_pics/DedicatedLogicRegisters.png){ width=95% }
+# TODO : verifier les Nobmre de registres
+![dedicated_registers](_pics/reg_count.png){ width=95% }
 
 \raggedright
 
@@ -277,17 +278,19 @@ Chaque registre peut être compté, afin de retrouver la valeur présente ci-des
 
 |  | Size (bits) | | Size (bits) |
 | :--------------- | :--: | :----------- | :--: |
-| Constante ID | **32** |  Status | **2** |
-| New + Init | **2** | Mode + Speed  | **3** |
-| Nombres | **22\*4** | Données des LEDs sur DE1SoC | **10** |
+| Données des LEDs sur DE1SoC | **10** | Status | **2** |
+| Mode + Speed  | **3** | New + Init | **2** | 
+| Nombres | **22\*4** |  readdatavalid | **1** |
+| readdata | **1**  | constante nombres | **2\*4** | 
+| Nbr_save | **1** | mem | **1**  |
+| Machine d'état | **3** | |  |
 
 
 \hfill\break
 
 Ce qui amène alors à:
 
-$Dedicated Logic Registers = 32 + 32 + 32 + 10 + 6 + 6 + 3 + 1 + 1 = \boldsymbol 121$
-
+$Dedicated Logic Registers = 10 + 1 + 2 + 3 + 2 + 22*4 +  + 1 + 1 + 2*4 + 1 + 3 = 121$
 \hfill\break
 
 Les constantes, tel que la constante ID du périphérique, sont connectées en dures et ne comptent alors pas dans le compte de registres.
@@ -386,7 +389,6 @@ Pour conclure, le laboratoire a été réalisé avec succès! Le cahier des char
 
 \center
 
-![chrono00_id_rd](_pics/simu00_id_rd.png){ width=80% }
 
 \raggedright
 
@@ -396,7 +398,6 @@ Ici, il est constaté que la valeur lue de l'ID (côté étudiant) est faite cor
 
 \center
 
-![chrono00_id_rdwr](_pics/simu01_id_rdwr.png){ width=80% }
 
 \raggedright
 
@@ -406,7 +407,6 @@ Ce chronogramme permet de voir que la lecture, la modification et la relecture d
 
 \center
 
-![chrono00_id_consec_rd](_pics/simu02_ids_doublerd.png){ width=80% }
 
 \raggedright
 
@@ -416,7 +416,6 @@ En forçant les valeurs de *read_i* et de *avl_address_i*, le dernier chronogram
 
 \center
 
-![simu00_console](_pics/simu00_2_console.png){ width=80% }
 
 \raggedright
 
@@ -426,11 +425,7 @@ Sur la console, ces instructions permettent de confirmer que seul les bits 15 à
 
 #### Lecture des entrées utilisateurs
 
-\
 
-\center
-
-![chrono01_inputs](_pics/simu03_inputs.png){ width=80% }
 
 \raggedright
 
@@ -440,124 +435,12 @@ Ce chronogramme permet de valider que les valeurs des interrupteurs et des bouto
 
 Ce qui est validé, également avec la console ci-dessous:
 
-\center
-
-![simu01_console](_pics/simu03_console.png){ width=75% }
-
-\raggedright
-
 \pagebreak
 
 #### Écriture/Relecture des LEDs sur DE1SoC
-
-\
-
-\center
-
-![simu02_console](_pics/simu04_console.png){ width=80% }
-
-\raggedright
-
-\center
-
-![console_led0_de1soc](_pics/simu04_de1_leds_0x1.png){ width=70% }
-
-\raggedright
-
-\center
-
-![console_led1_de1soc](_pics/simu04_de1_leds_0x2.png){ width=70% }
-
-\raggedright
-
-\center
-
-![console_led7_de1soc](_pics/simu04_de1_leds_0x8.png){ width=70% }
-
-\raggedright
 
 \hfill\break
 
 Le chronogramme et les consoles vérifient le fonctionnement souhaité, transmis par les chronogrammes du bus Avalon (dans le dossier /doc, mis à disposition).
 
 \pagebreak
-
-#### Maintien du *write enable* d'écriture sur MAX10
-
-\
-
-\center
-
-![chrono03_we](_pics/simu05_max10_we.png){ width=96% }
-
-\raggedright
-
-Le bit *write enable* est simulé correctement à 1'120\[ns\], comme calculé au titre **[Machine d'état pour l'écriture de la MAX10](#machine-détat-pour-lécriture-de-la-max10)**.
-
-\hfill\break
-
-\center
-
-![simu03_console](_pics/simu05_console.png){ width=80% }
-
-La console permet de voir que passer le délai de 1.12\[us\], le registre du *write enable* (ou appelé *busy* dans la solution adoptée) redescend bien à 0.
-
-\raggedright
-
-\pagebreak
-
-### Mesures *write enable*
-
-#### *Write enable* de 1.1us - 1
-
-\
-
-\center
-
-![1us_m0](_pics/1us_meas0.jpg){ width=69% }
-
-\raggedright
-
-\hfill\break
-
-#### *Write enable* de 1.1us - 2
-
-\
-
-\center
-
-![1us_m1](_pics/1us_meas1.jpg){ width=69% }
-
-\raggedright
-
-Comme mentionné en titre **[Machine d’état pour l’écriture de la MAX10](#machine-détat-pour-lécriture-de-la-max10)**, on voit que sur 1.12\[us\], on retrouve une légère fluctuation.
-
-En prenant la mesure initiale (voir page suivante), il serait alors possible de descendre en dessous de la \[us\].
-
-\pagebreak
-
-#### *Write enable* de 1us
-
-\
-
-\center
-
-![1us_m1](_pics/1us_meas_precise.jpg){ width=80% }
-
-\raggedright
-
-\hfill\break
-
-#### Indication sur la mesure
-
-\
-
-\center
-
-![schema_meas](_pics/gpio1.png){ width=57% }
-
-\raggedright
-
-\hfill\break
-
-Pour effectuer les mesures, la sonde d'un oscilloscope a été planté en pin n°2, avec un point de référence en pin n°12, à la masse.
