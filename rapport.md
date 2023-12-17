@@ -147,7 +147,7 @@ Le plan d'adressage aiaint comme adresse de base 0xFF200000 a ensuite été déf
 | Address (CPU Side) [16..0] | Address (Itf side) [15..2] | Definition | R/W | BITS |
 | :----------: | :---------: | :------------- | :-: |
 | 0x1_0000 | 0x0000 | Constant ID (**0xDEADBEEF**) | R | [31..0] |
-| 0x1_0004 | 0x0001 | IN: Keys | R | [3..0]
+| 0x1_0004 | 0x0001 | IN: Keys | R | [3..0] |
 | 0x1_0008 | 0x0003 | IN: Switches | R | [9..0] |
 | 0x1_000C | 0x0003 | OUT/IN: LEDs | R/W | [9..0] |
 | 0x1_0010 | 0x0004 | OUT/IN: Status/Config.[^1] | R/W | [1..0]/[4] [0] |

@@ -110,7 +110,6 @@ architecture rtl of avl_user_interface is
     signal nbr_c_s                    : std_logic_vector(21 downto 0);
     signal nbr_d_s                    : std_logic_vector(21 downto 0);
     --| Avalon signals         |--------------------------------------------------------------
-    signal avl_interf_id2_s           : std_logic_vector(avl_readdata_o'range);
     signal avl_readdata_s             : std_logic_vector(avl_readdata_o'range);
     signal avl_readdatavalid_s        : std_logic;
     signal addr_int_s                 : integer;
@@ -207,7 +206,7 @@ architecture rtl of avl_user_interface is
           -- Update when write wanted
           if avl_write_i = '1' then
             case addr_int_s is
-              when 3     => led_s            <= avl_writedata_i(led_s'range);
+                when 3     => led_s            <= avl_writedata_i(led_s'range);
 
                 when 4     => new_nbr_s        <= avl_writedata_i(4);
                               init_nbr_s       <= avl_writedata_i(0);
@@ -215,13 +214,13 @@ architecture rtl of avl_user_interface is
                 when 5 => mode_gen_s       <= avl_writedata_i(4);
                           delay_s          <= avl_writedata_i(1 downto 0);
 
-              when 7 => status_s(1) <= avl_writedata_i(0);
+                when 7 => status_s(1) <= avl_writedata_i(0);
 
 
                 when others            => NULL;
                 --avl_readdata_s   <= DBG_WR_CST; -- Used during simulation
-              end case;
-            end if;
+            end case;
+          end if;
         end if;
       end process;
 
@@ -256,7 +255,7 @@ architecture rtl of avl_user_interface is
 
     -- Connection internal signals to real signals
   
-    led_o               <= led_s;
+      led_o               <= led_s;
 
       auto_o              <= mode_gen_s;
       delay_o             <= delay_s;
