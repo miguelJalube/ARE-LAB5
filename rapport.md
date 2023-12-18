@@ -267,33 +267,46 @@ Sous le report de synthétisation: `Fitter > Resource Section > Resource Utiliza
 
 \center
 
-# TODO : verifier les Nobmre de registres
 ![dedicated_registers](_pics/reg_count.png){ width=95% }
 
 \raggedright
 
 \hfill\break
 
-Chaque registre peut être compté, afin de retrouver la valeur présente ci-dessus:
+Chaque registre peut être compté, afin de retrouver la valeur qui devrait être obtenue.
 
 |  | Size (bits) | | Size (bits) |
 | :--------------- | :--: | :----------- | :--: |
 | Données des LEDs sur DE1SoC | **10** | Status | **2** |
 | Mode + Speed  | **3** | New + Init | **2** | 
 | Nombres | **22\*4** |  readdatavalid | **1** |
-| readdata | **1**  | constante nombres | **2\*4** | 
-| Nbr_save | **1** | mem | **1**  |
-| Machine d'état | **3** | |  |
+| readdata | **32**  |Machine d'état | **3** | 
+
 
 
 \hfill\break
 
 Ce qui amène alors à:
 
-$Dedicated Logic Registers = 10 + 1 + 2 + 3 + 2 + 22*4 +  + 1 + 1 + 2*4 + 1 + 3 = 121$
+$Dedicated Logic Registers = 10 + 2 + 3 + 2 + 22*4 +  + 1 
+32 + 3 = 141$
 \hfill\break
 
 Les constantes, tel que la constante ID du périphérique, sont connectées en dures et ne comptent alors pas dans le compte de registres.
+
+Mais nous voyons une disparitée entre le compte de registres et le compte de registres dédiés au *design* offert par Quartus. En effet, le compte de registres dédiés au *design* est de 121, alors que le compte de registres est de 141.
+Ceci même si l'on compile le avl_user_interface seul, sans le reste du projet (138 au lieu de 141).
+
+![dedicated_registers_without_project](_pics/reg_count_solo.png){ width=95% }
+
+Ceci est dû au fait que le compilateur de Quartus optimise le code.
+
+Trouver a quel endroit ces optimisations sont faites est difficile.L'option la plus probable est que quartus ne va pas shyntethiser certain registres au complet, comme par exemple readdata qui devrait faire 32 bits mais est vraiseblablement optimisé en 23 bits.
+22 pour sa valeur la plu grande qu'sont les nobres générés et 1 pour la constante ID.
+
+Ceci a été dicuté avec le professeur et il nous a dit que c'était normal et que trouver exactement ou quartus optimise était très difficile.
+
+Nous avons décidé de ne pas chercher plus loin et de continuer avec cette valeur de registres.
 
 \pagebreak
 
