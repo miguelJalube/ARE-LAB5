@@ -384,6 +384,8 @@ Comme on peut voir dans le chronogramme, on demande un nombre en mettant le sign
 Tests TCL/TK :
 ![tcl tk](_pics/tcltk.png){ width=80% } 
 
+## **Tests mode fiable**
+
 | Action sur les Interrupteurs/Boutons | Résultat Attendu (Équation) | Résultat Observé |
 |--------------------------------------|-----------------------------|------------------|
 | SW0 = 1 (Activation du mode fiable)  | na + nb + nc = nd (vérification de l'équation) | *OK* |
