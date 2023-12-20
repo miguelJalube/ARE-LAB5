@@ -294,8 +294,9 @@ $Dedicated Logic Registers = 10 + 2 + 3 + 2 + 22*4 +  + 1
 Les constantes, tel que la constante ID du périphérique, sont connectées en dures et ne comptent alors pas dans le compte de registres.
 
 Mais nous voyons une disparitée entre le compte de registres et le compte de registres dédiés au *design* offert par Quartus. En effet, le compte de registres dédiés au *design* est de 121, alors que le compte de registres est de 141.
+
 Ceci même si l'on compile le avl_user_interface seul, sans le reste du projet (138 au lieu de 141).
-ces 3 bit son du au fait que quartus optimise les bits de status et de la machine d'etat en effet la machine detat ne va utiliser que 2 bit car letat init est 00 et les bit de status sont hard codé a partir des sortie de la machine d'etat.
+ces 3 bit son du au fait que quartus optimise les bits de status, la machine d'etat et le bit de memorisation en effet la machine detat ne va utiliser que 2 bit car letat init est 00 et le bit de status 0 est affecté grace a un bit de la machine d'etat et de meme pour le bit de memorisation qui est affecté par le bit de status 1.
 
 ![dedicated_registers_without_project](_pics/reg_count_solo.png){ width=95% }
 

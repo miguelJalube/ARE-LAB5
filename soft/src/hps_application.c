@@ -132,7 +132,6 @@ int main(void)
     Leds_set(0x0);
 
     /* set our base mode based on switches */
-
     uint32_t switches;
     uint32_t status;
     uint32_t errors = 0;
