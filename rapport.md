@@ -182,7 +182,7 @@ La circuiterie a été coupée en 3 parties majeures; **lecture**, **écriture**
 
 \center
 
-![interface_split](_pics/ff.jpg){ width=90% }
+![interface_split](_pics/ff.png){ width=90% }
 (Pour une vue plus précise voir le document schema_bloc.pdf)
 
 \raggedright
@@ -199,7 +199,6 @@ Ce canal possède un DEMUX qui permet de choisir lequel des 4 registres écrivab
 
 \hfill\break
 
-# TODO : mettre le schéma du DEMUX READ
 Le schéma résultant se présente ainsi:
 
 \center
@@ -385,7 +384,7 @@ Tests TCL/TK :
 
 ## **Conclusion**
 
-Pour conclure, le laboratoire a été réalisé avec succès! Le cahier des charges est rempli et tant le *design*, que le programme, sont tout 2 facilement modifiables si besoin.
+Pour conclure, le laboratoire a été réalisé avec succès! Le cahier des charges est rempli et tant le *design*, que le programme, sont tout 2 facilement modifiables au besoin. Une seule des deux adresses à ouvertes à usage des étudiants a été utilisée (Offset 0x1C), mais la deuxième est disponible pour une éventuelle extension du projet. Pour ce qui est du programme C il est important de noter que dans le mode manuel lors de l'initialisation et la demande d'un nouveau nombre, c'est au logiciel de mettre les deux signaux à respectivement à 1 et ensuite à 0 cette partie aurait pu être couverte par une machine d'état mais nous avons préféré laisser le logiciel gérer cette partie afin de simplifier le code de l'interface.
 
 
 \hfill\break
