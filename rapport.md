@@ -392,7 +392,6 @@ Tests TCL/TK :
 | SW7 = 0 puis SW7 = 1 (Changement mode) | Changement de l'état du système (manuel à automatique et vice versa) | *OK* |
 | Réglage de SW9-8 pour la fréquence maximale | Fonctionnement du système sans erreur à la fréquence maximale | *OK* |
 | Appuyer et maintenir KEY2 (Lecture) | na, nb, nc, nd lus successivement, vérification de na + nb + nc = nd | *OK* |
-| Réglage de SW9-8 pour la fréquence maximale (11) | Aucune erreur ne doit être observée lors du fonctionnement à la fréquence maximale | *OK* |
 
 
 
