@@ -358,7 +358,7 @@ Ceci à été fait pour ne pas avoir à gérer cette pulse grâce a une machine 
   Nous avons implémenté cette solution, car elle est plus proche du cahier des charges.
 
 \pagebreak
-## **Test**
+## **Tests mode non fiable**
 
 Les tests de la partie une ont donnée des résultats corrects. Le chronogramme montre cette liste d'actions dans l'ordre :
 1. Initialisation de l'interface
@@ -383,6 +383,18 @@ Comme on peut voir dans le chronogramme, on demande un nombre en mettant le sign
 
 Tests TCL/TK :
 ![tcl tk](_pics/tcltk.png){ width=80% } 
+
+| Action sur les Interrupteurs/Boutons | Résultat Attendu (Équation) | Résultat Observé |
+|--------------------------------------|-----------------------------|------------------|
+| SW0 = 1 (Activation du mode fiable)  | na + nb + nc = nd (vérification de l'équation) | *OK* |
+| Appuyer sur KEY0 (Initialisation)    | na = 0, nb = 0, nc = 0, nd = 0 (réinitialisation des valeurs) | *OK* |
+| Appuyer sur KEY1 (Génération de nombres) | na + nb + nc = nd (génération de nouvelles valeurs respectant l'équation) | *OK* |
+| SW7 = 0 puis SW7 = 1 (Changement mode) | Changement de l'état du système (manuel à automatique et vice versa) | *OK* |
+| Réglage de SW9-8 pour la fréquence maximale | Fonctionnement du système sans erreur à la fréquence maximale | *OK* |
+| Appuyer et maintenir KEY2 (Lecture) | na, nb, nc, nd lus successivement, vérification de na + nb + nc = nd | *OK* |
+| Réglage de SW9-8 pour la fréquence maximale (11) | Aucune erreur ne doit être observée lors du fonctionnement à la fréquence maximale | *OK* |
+
+
 
 ## **Conclusion**
 
